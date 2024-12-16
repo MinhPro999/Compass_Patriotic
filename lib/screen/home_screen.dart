@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:homescreen_compassapp/core/culcalator_monster.dart';
 import 'package:homescreen_compassapp/screen/screen_compass.dart';
 import 'package:homescreen_compassapp/screen/screen_compass_8.dart';
@@ -10,6 +11,12 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Color.fromARGB(222, 190, 10, 10),
+        statusBarIconBrightness: Brightness.light, // Biểu tượng màu sáng
+      ),
+    );
     return Scaffold(
       body: Stack(
         children: [

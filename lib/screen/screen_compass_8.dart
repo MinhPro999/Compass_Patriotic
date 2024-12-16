@@ -64,66 +64,71 @@ class _BatTrachScreenState extends State<BatTrachScreen> {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 12),
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CompassWidget(
-                        compassImagePath:
-                            compassData?['compass']?[0]?['co'] ?? '',
-                      ),
-                      Image.asset(
-                        overlayImagePath,
-                        height: 400,
-                        width: 400,
-                        fit: BoxFit.contain,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  StreamBuilder<CompassEvent>(
-                    stream: FlutterCompass.events,
-                    builder: (context, snapshot) {
-                      final CompassEvent? event = snapshot.data;
-                      final headingData = getHeadingData(event?.heading);
-                      final double? heading = headingData['heading'];
-                      final String direction = headingData['direction'];
+              child: Center(
+                // Căn giữa toàn bộ nội dung
+                child: Column(
+                  mainAxisSize:
+                      MainAxisSize.min, // Tối ưu chiều dọc cho nội dung
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 12),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CompassWidget(
+                          compassImagePath:
+                              compassData?['compass']?[0]?['co'] ?? '',
+                        ),
+                        Image.asset(
+                          overlayImagePath,
+                          height: 400,
+                          width: 400,
+                          fit: BoxFit.contain,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    StreamBuilder<CompassEvent>(
+                      stream: FlutterCompass.events,
+                      builder: (context, snapshot) {
+                        final CompassEvent? event = snapshot.data;
+                        final headingData = getHeadingData(event?.heading);
+                        final double? heading = headingData['heading'];
+                        final String direction = headingData['direction'];
 
-                      if (heading == null) {
-                        return const Text(
-                          'Không có dữ liệu cảm biến!',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
+                        if (heading == null) {
+                          return const Text(
+                            'Không có dữ liệu cảm biến!',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          );
+                        }
+
+                        final info = _getDetailedInfo(direction);
+                        final Color colorChu = Color(int.parse(
+                            info['color_chu']!.replaceAll('0x', '0xFF')));
+                        final Color colorBox = Color(int.parse(
+                            info['color_box']!.replaceAll('0x', '0xFF')));
+
+                        return BuildInfoBox8(
+                          data: {
+                            "huong": info['huong'] ?? '',
+                            "tot_xau": info['tot_xau'] ?? '',
+                            "cung": info['cung'] ?? '',
+                            "y_nghia": info['y_nghia'] ?? '',
+                            "nen": info['nen'] ?? '',
+                            "khong_nen": info['khong_nen'] ?? '',
+                          },
+                          heading: heading,
+                          colorChu: colorChu,
+                          colorBox: colorBox,
                         );
-                      }
-
-                      final info = _getDetailedInfo(direction);
-                      final Color colorChu = Color(int.parse(
-                          info['color_chu']!.replaceAll('0x', '0xFF')));
-                      final Color colorBox = Color(int.parse(
-                          info['color_box']!.replaceAll('0x', '0xFF')));
-
-                      return BuildInfoBox8(
-                        data: {
-                          "huong": info['huong'] ?? '',
-                          "tot_xau": info['tot_xau'] ?? '',
-                          "cung": info['cung'] ?? '',
-                          "y_nghia": info['y_nghia'] ?? '',
-                          "nen": info['nen'] ?? '',
-                          "khong_nen": info['khong_nen'] ?? '',
-                        },
-                        heading: heading,
-                        colorChu: colorChu,
-                        colorBox: colorBox,
-                      );
-                    },
-                  ),
-                ],
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
