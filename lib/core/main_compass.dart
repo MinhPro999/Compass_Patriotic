@@ -56,7 +56,9 @@ class _CompassWidgetState extends State<CompassWidget> {
         _filteredAngle += _alpha * deltaAngle;
 
         // Giới hạn _filteredAngle trong phạm vi 0–360 để kiểm soát giá trị
-        if (_filteredAngle >= 360) {
+        if (_filteredAngle == 0) {
+          // Giữ nguyên giá trị 0, không làm gì
+        } else if (_filteredAngle >= 360) {
           _filteredAngle -= 360;
         } else if (_filteredAngle < 0) {
           _filteredAngle += 360;
