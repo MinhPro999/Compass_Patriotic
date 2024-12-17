@@ -39,26 +39,27 @@ class _UserInfoBarState extends State<UserInfoBar> {
             children: [
               // Logo
               SizedBox(
-                height: 56, // Chiều cao của container chứa ảnh
-                width: 56, // Chiều rộng của container chứa ảnh
+                height: 48, // Chiều cao của container chứa ảnh
+                width: 48, // Chiều rộng của container chứa ảnh
                 child: Image.asset(
                   'assets/images/icon_app_mini.png',
                   fit: BoxFit.contain, // Đảm bảo ảnh không bị méo
                 ),
               ),
-              const SizedBox(width: 8), // Khoảng cách giữa logo và radio
+              const SizedBox(width: 0), // Khoảng cách giữa logo và radio
               // Chọn giới tính
               Expanded(
                 child: _buildGenderSelection(),
               ),
-              const SizedBox(width: 8), // Khoảng cách giữa radio và ô nhập năm
+              const SizedBox(width: 0), // Khoảng cách giữa radio và ô nhập năm
               // Nhập năm sinh
               SizedBox(
-                width: 120, // Đặt chiều rộng cố định cho TextField
+                width: 100, // Đặt chiều rộng cố định cho TextField
                 child: _buildYearOfBirthField(),
               ),
             ],
           ),
+
           const SizedBox(height: 8),
           // Hiển thị quái số và mệnh
           Text(
@@ -87,7 +88,7 @@ class _UserInfoBarState extends State<UserInfoBar> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         _genderRadio('Nam'),
-        const SizedBox(width: 8), // Khoảng cách giữa các radio
+        const SizedBox(width: 0), // Khoảng cách giữa các radio
         _genderRadio('Nữ'),
       ],
     );

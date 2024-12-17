@@ -17,3 +17,14 @@ tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.0' // Đảm bảo sử dụng phiên bản mới nhất
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0'
+    }
+}
+
