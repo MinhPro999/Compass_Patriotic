@@ -83,46 +83,52 @@ class CompassDetailScreen extends StatelessWidget {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Center(
-                // Sử dụng Center để căn giữa toàn bộ nội dung
-                child: Column(
-                  mainAxisSize: MainAxisSize
-                      .min, // Thu nhỏ theo nội dung thay vì chiếm toàn bộ chiều cao
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
+              child: Column(
+                children: [
+                  const SizedBox(
+                      height: 196), // Thêm khoảng cách 20px ở đầu SafeArea
+                  Center(
+                    // Sử dụng Center để căn giữa toàn bộ nội dung
+                    child: Column(
+                      mainAxisSize: MainAxisSize
+                          .min, // Thu nhỏ theo nội dung thay vì chiếm toàn bộ chiều cao
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Widget la bàn xoay
-                        CompassWidget(
-                          compassImagePath: compassImagePath,
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Widget la bàn xoay
+                            CompassWidget(
+                              compassImagePath: compassImagePath,
+                            ),
+                            // Khung PNG cố định
+                            Image.asset(
+                              overlayImagePath,
+                              height: 400,
+                              width: 400,
+                              fit: BoxFit.contain,
+                            ),
+                          ],
                         ),
-                        // Khung PNG cố định
-                        Image.asset(
-                          overlayImagePath,
-                          height: 400,
-                          width: 400,
-                          fit: BoxFit.contain,
+                        const SizedBox(height: 16),
+
+                        // Hiển thị góc tham chiếu
+                        const StreamBuilderCompassDegree(),
+                        const SizedBox(height: 16),
+
+                        // Mô tả
+                        Text(
+                          description,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-
-                    // Hiển thị góc tham chiếu
-                    const StreamBuilderCompassDegree(),
-                    const SizedBox(height: 16),
-
-                    // Mô tả
-                    Text(
-                      description,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.white70,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
