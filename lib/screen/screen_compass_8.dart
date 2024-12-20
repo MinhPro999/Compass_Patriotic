@@ -69,9 +69,10 @@ class _BatTrachScreenState extends State<BatTrachScreen> {
                 child: Column(
                   mainAxisSize:
                       MainAxisSize.min, // Tối ưu chiều dọc cho nội dung
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 0),
                     Stack(
                       alignment: Alignment.center,
                       children: [
@@ -87,7 +88,7 @@ class _BatTrachScreenState extends State<BatTrachScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 4),
                     StreamBuilder<CompassEvent>(
                       stream: FlutterCompass.events,
                       builder: (context, snapshot) {

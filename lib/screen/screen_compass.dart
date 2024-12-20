@@ -86,7 +86,7 @@ class CompassDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(
-                      height: 196), // Thêm khoảng cách 20px ở đầu SafeArea
+                      height: 160), // Thêm khoảng cách ở đầu SafeArea
                   Center(
                     // Sử dụng Center để căn giữa toàn bộ nội dung
                     child: Column(
@@ -110,11 +110,11 @@ class CompassDetailScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 8),
 
                         // Hiển thị góc tham chiếu
                         const StreamBuilderCompassDegree(),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 8),
 
                         // Mô tả
                         Text(
