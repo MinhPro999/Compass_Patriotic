@@ -84,7 +84,7 @@ class HomeScreen extends StatelessWidget {
                                           () {
                                             // Kiểm tra xem giới tính hoặc năm sinh có bị rỗng không
                                             if (genderGlobal.isEmpty ||
-                                                yearCheckHomeScreen.isEmpty) {
+                                                yearGlobal.isEmpty) {
                                               showDialog(
                                                 context: context,
                                                 builder: (context) =>

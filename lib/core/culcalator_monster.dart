@@ -1,7 +1,6 @@
 import 'package:homescreen_compassapp/screen/screen_compass_8.dart';
 
-String yearCheckHomeScreen = yearGlobal.toString();
-int yearGlobal = 0;
+String yearGlobal = "";
 
 class GuaCalculator {
   static Map<String, dynamic> determineMansion(int yearOfBirth, String gender) {
@@ -32,7 +31,7 @@ class GuaCalculator {
       guaNumber = (guaNumber % 10) + (guaNumber ~/ 10);
     }
     guaNumber00 = guaNumber;
-    yearGlobal = yearOfBirth;
+    yearGlobal = yearOfBirth.toString();
 
     String mansion =
         ([1, 3, 4, 9].contains(guaNumber)) ? 'Đông Tứ Mệnh' : 'Tây Tứ Mệnh';
