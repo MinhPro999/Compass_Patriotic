@@ -1,7 +1,7 @@
+import 'package:compassapp_vn/core/main_compass.dart';
+import 'package:compassapp_vn/core/streambuilder_degree.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:homescreen_compassapp/core/main_compass.dart';
-import 'package:homescreen_compassapp/core/streambuilder_degree.dart';
 
 // Hàm xác định hướng từ góc
 String getDirectionFromAngle(double angle) {

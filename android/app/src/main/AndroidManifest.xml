@@ -1,13 +1,13 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.hellovietnam.compass_fix">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.hellovietnam.compassapp_vn">
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     <application
-        android:label="La Bàn Yêu Nước"
+        android:label="La Bàn Đại Việt"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
        
         <activity
-            android:name="com.hellovietnam.compass_fix.MainActivity"
+            android:name="com.hellovietnam.compassapp_vn.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""

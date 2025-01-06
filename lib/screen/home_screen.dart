@@ -1,10 +1,10 @@
+import 'package:compassapp_vn/core/culcalator_monster.dart';
+import 'package:compassapp_vn/screen/screen_compass.dart';
+import 'package:compassapp_vn/screen/screen_compass_8.dart';
+import 'package:compassapp_vn/widgets/funtion_gidview.dart';
+import 'package:compassapp_vn/widgets/user_info_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:homescreen_compassapp/core/culcalator_monster.dart';
-import 'package:homescreen_compassapp/screen/screen_compass.dart';
-import 'package:homescreen_compassapp/screen/screen_compass_8.dart';
-import 'package:homescreen_compassapp/widgets/funtion_gidview.dart';
-import 'package:homescreen_compassapp/widgets/user_info_bar.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

@@ -1,4 +1,4 @@
-import 'package:homescreen_compassapp/screen/screen_compass_8.dart';
+import 'package:compassapp_vn/screen/screen_compass_8.dart';
 
 String yearGlobal = "";
 
