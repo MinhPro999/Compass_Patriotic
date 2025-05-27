@@ -1,5 +1,6 @@
 import 'package:compassapp_vn/core/main_compass.dart';
 import 'package:compassapp_vn/core/streambuilder_degree.dart';
+import 'package:compassapp_vn/widgets/ads_banner_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -86,7 +87,7 @@ class CompassDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(
-                      height: 160), // Thêm khoảng cách ở đầu SafeArea
+                      height: 120), // Thêm khoảng cách ở đầu SafeArea
                   Center(
                     // Sử dụng Center để căn giữa toàn bộ nội dung
                     child: Column(
@@ -124,6 +125,13 @@ class CompassDetailScreen extends StatelessWidget {
                             color: Colors.white70,
                           ),
                           textAlign: TextAlign.center,
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Banner Ad
+                        const AdBannerWidget(
+                          showPlaceholder: false,
                         ),
                       ],
                     ),

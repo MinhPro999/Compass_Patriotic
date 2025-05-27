@@ -1,57 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../services/admob_service.dart';
 
-class AdBannerWidget extends StatefulWidget {
-  const AdBannerWidget({super.key});
+/// Widget hiển thị banner ad sử dụng AdMobService
+class AdBannerWidget extends StatelessWidget {
+  final EdgeInsets? margin;
+  final bool showPlaceholder;
 
-  @override
-  _AdBannerWidgetState createState() => _AdBannerWidgetState();
-}
-
-class _AdBannerWidgetState extends State<AdBannerWidget> {
-  BannerAd? _bannerAd;
-  bool _isAdLoaded = false;
+  const AdBannerWidget({
+    super.key,
+    this.margin,
+    this.showPlaceholder = true,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return _isAdLoaded
-        ? SizedBox(
-            height: _bannerAd!.size.height.toDouble(),
-            width: _bannerAd!.size.width.toDouble(),
-            child: AdWidget(ad: _bannerAd!),
-          )
-        : const SizedBox.shrink(); // Hiển thị trống nếu quảng cáo chưa sẵn sàng
-  }
+    final adWidget = AdMobService.instance.getBannerAdWidget();
 
-  @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
-  }
+    if (adWidget != null) {
+      return Container(
+        margin: margin,
+        child: adWidget,
+      );
+    }
 
-  @override
-  void initState() {
-    super.initState();
+    // Hiển thị placeholder nếu ad chưa load hoặc không khả dụng
+    if (showPlaceholder) {
+      return Container(
+        margin: margin,
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Center(
+          child: Text(
+            'Đang tải quảng cáo...',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      );
+    }
 
-    // Tạo quảng cáo Banner
-    _bannerAd = BannerAd(
-      adUnitId:
-          'ca-app-pub-9304712998147652/5034133623', // Thay bằng Ad Unit ID của bạn
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (_) {
-          setState(() {
-            _isAdLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          print('Failed to load banner ad: ${error.message}');
-          ad.dispose();
-        },
-      ),
-    );
-
-    _bannerAd?.load();
+    return const SizedBox.shrink();
   }
 }

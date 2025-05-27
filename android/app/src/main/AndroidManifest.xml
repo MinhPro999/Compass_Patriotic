@@ -1,11 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.hellovietnam.compassapp_vn">
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="La Bàn Đại Việt"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
-       
+
         <activity
             android:name="com.hellovietnam.compassapp_vn.MainActivity"
             android:exported="true"
@@ -26,7 +27,24 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-                
+
+            </intent-filter>
+
+            <!-- Facebook Deep Linking -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="@string/fb_login_protocol_scheme" />
+            </intent-filter>
+
+            <!-- Custom Deep Linking for Ads -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                      android:host="compassapp.hellovietnam.com" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
@@ -37,6 +55,16 @@
             <meta-data
         android:name="com.google.android.gms.ads.APPLICATION_ID"
         android:value="ca-app-pub-9304712998147652~6524476555"/>
+
+        <!-- Facebook App ID -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
+        <!-- Facebook Client Token (optional) -->
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="fb1010457991232883" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

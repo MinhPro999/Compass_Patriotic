@@ -1,16 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:compassapp_vn/core/culcalator_monster.dart';
 import 'package:compassapp_vn/core/main_compass.dart';
 import 'package:compassapp_vn/core/streambuilder_degree.dart';
 import 'package:compassapp_vn/widgets/build_infobox_8.dart';
-import 'package:compassapp_vn/widgets/user_info_bar.dart';
+import 'package:compassapp_vn/widgets/ads_banner_widget.dart';
+import 'package:compassapp_vn/providers/user_state.dart';
+import 'package:compassapp_vn/providers/compass_state.dart';
+import 'package:compassapp_vn/core/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
-
-int guaNumber00 = 0;
+import 'package:provider/provider.dart';
+import 'package:logging/logging.dart';
 
 class BatTrachScreen extends StatefulWidget {
   const BatTrachScreen({
@@ -22,119 +23,129 @@ class BatTrachScreen extends StatefulWidget {
 }
 
 class _BatTrachScreenState extends State<BatTrachScreen> {
-  Map<String, dynamic>? compassData;
-  final String overlayImagePath = 'assets/images/khung_8.png';
-  Map<String, dynamic> huongTotXauMap = {};
-  Map<String, dynamic> yNghiaCungMap = {};
-  Map<String, dynamic> nenKhongNenMap = {};
+  static final Logger _logger = Logger('BatTrachScreen');
+  final String overlayImagePath = AppConstants.compass8Overlay;
   StreamSubscription? _compassSubscription;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          'La Bàn Bát Trạch $genderGlobal $yearGlobal',
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xAEBE0A0A),
-        elevation: 0,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          if (compassData != null)
-            Image.asset(
-              compassData!['compass'][0]['background'],
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
+    return Consumer2<UserState, CompassState>(
+      builder: (context, userState, compassState, child) {
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                Navigator.pop(context);
+              },
             ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                // Căn giữa toàn bộ nội dung
-                child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min, // Tối ưu chiều dọc cho nội dung
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 0),
-                    Stack(
-                      alignment: Alignment.center,
+            title: Text(
+              'La Bàn Bát Trạch ${userState.gender} ${userState.yearOfBirth}',
+              style: const TextStyle(
+                fontSize: AppConstants.subtitleFontSize,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: const Color(AppConstants.primaryRedColor),
+            elevation: 0,
+          ),
+          extendBodyBehindAppBar: true,
+          body: Stack(
+            children: [
+              if (compassState.compassData != null)
+                Image.asset(
+                  compassState.compassData!['compass'][0]['background'],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        CompassWidget(
-                          compassImagePath:
-                              compassData?['compass']?[0]?['co'] ?? '',
+                        const SizedBox(height: 0),
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CompassWidget(
+                              compassImagePath: compassState
+                                      .compassData?['compass']?[0]?['co'] ??
+                                  '',
+                            ),
+                            Image.asset(
+                              overlayImagePath,
+                              height: AppConstants.compassSize,
+                              width: AppConstants.compassSize,
+                              fit: BoxFit.contain,
+                            ),
+                          ],
                         ),
-                        Image.asset(
-                          overlayImagePath,
-                          height: 400,
-                          width: 400,
-                          fit: BoxFit.contain,
+                        const SizedBox(height: 4),
+                        StreamBuilder<CompassEvent>(
+                          stream: FlutterCompass.events,
+                          builder: (context, snapshot) {
+                            final CompassEvent? event = snapshot.data;
+                            final headingData = getHeadingData(event?.heading);
+                            final double? heading = headingData['heading'];
+                            final String direction = headingData['direction'];
+
+                            if (heading == null) {
+                              return const Text(
+                                AppConstants.noSensorData,
+                                style: TextStyle(
+                                  fontSize: AppConstants.bodyFontSize,
+                                  color: Colors.white,
+                                ),
+                              );
+                            }
+
+                            final info =
+                                compassState.getDetailedInfo(direction);
+                            final Color colorChu = Color(int.parse(
+                                info['color_chu']!.replaceAll('0x', '0xFF')));
+                            final Color colorBox = Color(int.parse(
+                                info['color_box']!.replaceAll('0x', '0xFF')));
+
+                            return Column(
+                              children: [
+                                BuildInfoBox8(
+                                  data: {
+                                    "huong": info['huong'] ?? '',
+                                    "tot_xau": info['tot_xau'] ?? '',
+                                    "cung": info['cung'] ?? '',
+                                    "y_nghia": info['y_nghia'] ?? '',
+                                    "nen": info['nen'] ?? '',
+                                    "khong_nen": info['khong_nen'] ?? '',
+                                  },
+                                  heading: heading,
+                                  colorChu: colorChu,
+                                  colorBox: colorBox,
+                                ),
+                                const SizedBox(height: 16),
+                                // Banner Ad
+                                const AdBannerWidget(
+                                  showPlaceholder: false,
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    StreamBuilder<CompassEvent>(
-                      stream: FlutterCompass.events,
-                      builder: (context, snapshot) {
-                        final CompassEvent? event = snapshot.data;
-                        final headingData = getHeadingData(event?.heading);
-                        final double? heading = headingData['heading'];
-                        final String direction = headingData['direction'];
-
-                        if (heading == null) {
-                          return const Text(
-                            'Không có dữ liệu cảm biến!',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          );
-                        }
-
-                        final info = _getDetailedInfo(direction);
-                        final Color colorChu = Color(int.parse(
-                            info['color_chu']!.replaceAll('0x', '0xFF')));
-                        final Color colorBox = Color(int.parse(
-                            info['color_box']!.replaceAll('0x', '0xFF')));
-
-                        return BuildInfoBox8(
-                          data: {
-                            "huong": info['huong'] ?? '',
-                            "tot_xau": info['tot_xau'] ?? '',
-                            "cung": info['cung'] ?? '',
-                            "y_nghia": info['y_nghia'] ?? '',
-                            "nen": info['nen'] ?? '',
-                            "khong_nen": info['khong_nen'] ?? '',
-                          },
-                          heading: heading,
-                          colorChu: colorChu,
-                          colorBox: colorBox,
-                        );
-                      },
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -150,91 +161,18 @@ class _BatTrachScreenState extends State<BatTrachScreen> {
     super.initState();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-    _loadJsonData(guaNumber: guaNumber00);
-  }
+    // Load JSON data using Provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userState = Provider.of<UserState>(context, listen: false);
+      final compassState = Provider.of<CompassState>(context, listen: false);
 
-  Map<String, String> _getDetailedInfo(String direction) {
-    Map<String, String> info = {};
-    String directionKey = direction.toLowerCase();
-
-    if (huongTotXauMap.containsKey(directionKey)) {
-      var currentData = huongTotXauMap[directionKey];
-      info['tot_xau'] = currentData?['tot_xau'] ?? '';
-      info['huong'] = currentData?['huong'] ?? '';
-      info['cung'] = currentData?['cung'] ?? '';
-      info['color_chu'] = currentData?['color_chu'] ?? '0xFFFFFFFF';
-      info['color_box'] = currentData?['color_box'] ?? '0xFF000000';
-    }
-
-    if (info['cung'] != null && yNghiaCungMap.containsKey(info['cung'])) {
-      var cungData = yNghiaCungMap[info['cung']];
-      info['y_nghia'] = cungData?['y_nghia'] ?? '';
-    }
-
-    if (info['cung'] != null && nenKhongNenMap.containsKey(info['cung'])) {
-      var nenData = nenKhongNenMap[info['cung']];
-      info['nen'] = nenData?['nen'] ?? '';
-      info['khong_nen'] = nenData?['khong_nen'] ?? '';
-    }
-
-    return info;
-  }
-
-  String _getJsonFileNameJsonFromGua(int guaNumber) {
-    Map<int, String> fileMapping = {
-      1: 'e1_data.json',
-      2: 'w2_data.json',
-      3: 'e3_data.json',
-      4: 'e4_data.json',
-      6: 'w6_data.json',
-      7: 'w7_data.json',
-      8: 'w8_data.json',
-      9: 'e9_data.json',
-    };
-
-    return fileMapping[guaNumber] ?? 'e1_data.json';
-  }
-
-  Future<void> _loadJsonData({required int guaNumber}) async {
-    String fileNameJson = _getJsonFileNameJsonFromGua(guaNumber);
-
-    try {
-      final String response =
-          await rootBundle.loadString('lib/data/$fileNameJson');
-      final data = json.decode(response);
-      setState(() {
-        compassData = data;
-
-        huongTotXauMap = {
-          for (var item in compassData!['huong_tot_xau'])
-            item['huong'].toLowerCase(): {
-              'huong': item['huong'] ?? '',
-              'tot_xau': item['tot_xau'] ?? '',
-              'cung': item['cung'] ?? '',
-              'color_chu': item['color_chu'] ?? '#FFFFFF',
-              'color_box': item['color_box'] ?? '#000000'
-            }
-        };
-
-        yNghiaCungMap = {
-          for (var item in compassData!['y_nghia_cung'])
-            item['cung']: {
-              'cung': item['cung'] ?? '',
-              'y_nghia': item['y_nghia'] ?? ''
-            }
-        };
-
-        nenKhongNenMap = {
-          for (var item in compassData!['nen_khong_nen'])
-            item['cung']: {
-              'cung': item['cung'] ?? '',
-              'nen': item['nen'] ?? '',
-              'khong_nen': item['khong_nen'] ?? ''
-            }
-        };
-      });
-    } catch (e) {
-      debugPrint('Error loading JSON file: $e');
-    }
+      if (userState.guaNumber > 0) {
+        compassState.loadJsonData(guaNumber: userState.guaNumber);
+        _logger
+            .info('Loading JSON data for gua number: ${userState.guaNumber}');
+      } else {
+        _logger.warning('Invalid gua number: ${userState.guaNumber}');
+      }
+    });
   }
 }

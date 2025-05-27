@@ -1,13 +1,32 @@
-import 'package:compassapp_vn/core/culcalator_monster.dart';
 import 'package:compassapp_vn/screen/screen_compass.dart';
 import 'package:compassapp_vn/screen/screen_compass_8.dart';
 import 'package:compassapp_vn/widgets/funtion_gidview.dart';
 import 'package:compassapp_vn/widgets/user_info_bar.dart';
+import 'package:compassapp_vn/widgets/ads_banner_widget.dart';
+import 'package:compassapp_vn/widgets/ads_allpage_widget.dart';
+import 'package:compassapp_vn/providers/user_state.dart';
+import 'package:compassapp_vn/services/facebook_service.dart';
+import 'package:compassapp_vn/core/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Log screen view to Facebook
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FacebookService.instance.logScreenView('home_screen');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +40,12 @@ class HomeScreen extends StatelessWidget {
             children: [
               // Ảnh nền
               Image.asset(
-                'assets/images/background.jpg',
+                AppConstants.backgroundImage,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black
+                    .withValues(alpha: OpacityConstants.backgroundOverlay),
                 colorBlendMode: BlendMode.srcATop,
               ),
               SafeArea(
@@ -41,9 +61,9 @@ class HomeScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Chọn La Bàn',
+                                AppConstants.chooseCompassTitle,
                                 style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: AppConstants.titleFontSize,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
@@ -63,56 +83,86 @@ class HomeScreen extends StatelessWidget {
                                 itemBuilder: (context, index) {
                                   return index == 0
                                       ? funtionGidview(
-                                          'assets/images/normal_compass.JPG',
-                                          'La bàn cơ bản',
-                                          () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const CompassDetailScreen(
-                                                  title: '',
-                                                  description: '',
-                                                ),
-                                              ),
+                                          AppConstants.normalCompassImage,
+                                          AppConstants.basicCompassTitle,
+                                          () async {
+                                            // Log compass usage to Facebook
+                                            FacebookService.instance
+                                                .logCompassUsage(
+                                              compassType: 'basic_compass',
                                             );
+
+                                            // Hiển thị interstitial ad trước khi navigate
+                                            await InterstitialAdHelper.showAd();
+
+                                            if (context.mounted) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const CompassDetailScreen(
+                                                    title: '',
+                                                    description: '',
+                                                  ),
+                                                ),
+                                              );
+                                            }
                                           },
                                         )
                                       : funtionGidview(
-                                          'assets/images/24_directions.JPG',
-                                          'La bàn theo tuổi',
-                                          () {
+                                          AppConstants.directionsImage,
+                                          AppConstants.ageCompassTitle,
+                                          () async {
+                                            final userState =
+                                                Provider.of<UserState>(context,
+                                                    listen: false);
+
                                             // Kiểm tra xem giới tính hoặc năm sinh có bị rỗng không
-                                            if (genderGlobal.isEmpty ||
-                                                yearGlobal.isEmpty) {
+                                            if (!userState.hasValidData) {
                                               showDialog(
                                                 context: context,
                                                 builder: (context) =>
                                                     AlertDialog(
-                                                  title: const Text(
-                                                      'Thông tin bị thiếu!'),
+                                                  title: const Text(AppConstants
+                                                      .missingInfoError),
                                                   content: const Text(
-                                                      'Bạn cần lựa chọn giới tính và nhập đầy đủ năm sinh ở ngay phía trên trước khi sử dụng La Bàn này.'),
+                                                      AppConstants
+                                                          .missingInfoMessage),
                                                   actions: [
                                                     TextButton(
                                                       onPressed: () {
                                                         Navigator.of(context)
-                                                            .pop(); // Đóng dialog
+                                                            .pop();
                                                       },
-                                                      child:
-                                                          const Text('ĐỒNG Ý'),
+                                                      child: const Text(
+                                                          AppConstants
+                                                              .agreeButton),
                                                     ),
                                                   ],
                                                 ),
                                               );
                                             } else {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const BatTrachScreen(),
-                                                ),
+                                              // Log compass usage to Facebook
+                                              FacebookService.instance
+                                                  .logCompassUsage(
+                                                compassType: 'age_compass',
+                                                userGender: userState.gender,
+                                                userAge: userState.yearOfBirth,
                                               );
+
+                                              // Hiển thị interstitial ad trước khi navigate
+                                              await InterstitialAdHelper
+                                                  .showAd();
+
+                                              if (context.mounted) {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const BatTrachScreen(),
+                                                  ),
+                                                );
+                                              }
                                             }
                                           },
                                         );
@@ -122,6 +172,11 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                    ),
+                    // Banner Ad ở cuối màn hình
+                    const AdBannerWidget(
+                      margin: EdgeInsets.only(top: 16),
+                      showPlaceholder: false,
                     ),
                   ],
                 ),

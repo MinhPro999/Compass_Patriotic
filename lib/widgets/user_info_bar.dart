@@ -1,8 +1,8 @@
-import 'package:compassapp_vn/core/culcalator_monster.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-String genderGlobal = "";
+import 'package:provider/provider.dart';
+import '../providers/user_state.dart';
+import '../core/constants.dart';
 
 class UserInfoBar extends StatefulWidget {
   final Function(String yearOfBirth, String gender)? onInfoChanged;
@@ -14,92 +14,92 @@ class UserInfoBar extends StatefulWidget {
 }
 
 class _UserInfoBarState extends State<UserInfoBar> {
-  String _gender = ''; // Giá trị mặc định
-  String _yearOfBirth = ''; // Giá trị mặc định
   final TextEditingController _yearController = TextEditingController();
   final FocusNode _yearFocusNode = FocusNode();
-  String _guaResult = ''; // Kết quả quái số và mệnh
 
   @override
   Widget build(BuildContext context) {
     // Cài đặt giao diện status bar
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
-        statusBarColor: Color(0xDEBE0A0A),
+        statusBarColor: Color(AppConstants.statusBarColor),
       ),
     );
 
-    return Container(
-      color: const Color(0xDEBE0A0A), // Màu nền của status bar
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<UserState>(
+      builder: (context, userState, child) {
+        return Container(
+          color: const Color(AppConstants.statusBarColor),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+          child: Column(
             children: [
-              // Logo
-              SizedBox(
-                height: 48, // Chiều cao của container chứa ảnh
-                width: 48, // Chiều rộng của container chứa ảnh
-                child: Image.asset(
-                  'assets/images/icon_app_mini.png',
-                  fit: BoxFit.contain, // Đảm bảo ảnh không bị méo
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Logo
+                  SizedBox(
+                    height: 48,
+                    width: 48,
+                    child: Image.asset(
+                      AppConstants.appIcon,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(width: 0),
+                  // Chọn giới tính
+                  Expanded(
+                    child: _buildGenderSelection(userState),
+                  ),
+                  const SizedBox(width: 0),
+                  // Nhập năm sinh
+                  SizedBox(
+                    width: 100,
+                    child: _buildYearOfBirthField(userState),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Hiển thị quái số và mệnh
+              Text(
+                userState.guaResult,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: AppConstants.bodyFontSize,
+                  fontWeight: FontWeight.bold,
                 ),
-              ),
-              const SizedBox(width: 0), // Khoảng cách giữa logo và radio
-              // Chọn giới tính
-              Expanded(
-                child: _buildGenderSelection(),
-              ),
-              const SizedBox(width: 0), // Khoảng cách giữa radio và ô nhập năm
-              // Nhập năm sinh
-              SizedBox(
-                width: 100, // Đặt chiều rộng cố định cho TextField
-                child: _buildYearOfBirthField(),
               ),
             ],
           ),
-
-          const SizedBox(height: 8),
-          // Hiển thị quái số và mệnh
-          Text(
-            _guaResult,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   @override
   void dispose() {
-    _yearController.dispose(); // Giải phóng tài nguyên
-    _yearFocusNode.dispose(); // Giải phóng tài nguyên FocusNode
+    _yearController.dispose();
+    _yearFocusNode.dispose();
     super.dispose();
   }
 
   // Widget chọn giới tính
-  Widget _buildGenderSelection() {
+  Widget _buildGenderSelection(UserState userState) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        _genderRadio('Nam'),
-        const SizedBox(width: 0), // Khoảng cách giữa các radio
-        _genderRadio('Nữ'),
+        _genderRadio('Nam', userState),
+        const SizedBox(width: 0),
+        _genderRadio('Nữ', userState),
       ],
     );
   }
 
   // Widget nhập năm sinh
-  Widget _buildYearOfBirthField() {
+  Widget _buildYearOfBirthField(UserState userState) {
     return TextField(
       textAlign: TextAlign.center,
       controller: _yearController,
-      focusNode: _yearFocusNode, // Gắn FocusNode để quản lý focus
+      focusNode: _yearFocusNode,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         hintText: 'Năm sinh',
@@ -107,23 +107,21 @@ class _UserInfoBarState extends State<UserInfoBar> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
           borderSide: const BorderSide(
-            color: Color(0xFFFDFC99), // Màu viền
-            width: 2, // Độ dày viền
+            color: Color(AppConstants.yellowColor),
+            width: 2,
           ),
         ),
         enabledBorder: OutlineInputBorder(
-          // Viền khi ô không được nhấn
           borderRadius: BorderRadius.circular(8.0),
           borderSide: const BorderSide(
-            color: Color(0xFFFDFC99),
+            color: Color(AppConstants.yellowColor),
             width: 2,
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          // Viền khi ô được nhấn vào
           borderRadius: BorderRadius.circular(8.0),
           borderSide: const BorderSide(
-            color: Color(0xFFC7C400),
+            color: Color(AppConstants.darkYellowColor),
             width: 2,
           ),
         ),
@@ -131,13 +129,13 @@ class _UserInfoBarState extends State<UserInfoBar> {
       ),
       keyboardType: TextInputType.number,
       inputFormatters: [
-        LengthLimitingTextInputFormatter(4), // Giới hạn nhập 4 ký tự
-        FilteringTextInputFormatter.digitsOnly, // Chỉ cho phép nhập số
+        LengthLimitingTextInputFormatter(AppConstants.maxYearLength),
+        FilteringTextInputFormatter.digitsOnly,
       ],
       onChanged: (value) {
-        _notifyInfoChange(); // Gọi logic cập nhật thông tin
-        if (value.length == 4) {
-          // Nếu đủ 4 số, ẩn bàn phím
+        userState.updateYearOfBirth(value);
+        widget.onInfoChanged?.call(value, userState.gender);
+        if (value.length == AppConstants.maxYearLength) {
           _yearFocusNode.unfocus();
         }
       },
@@ -145,86 +143,23 @@ class _UserInfoBarState extends State<UserInfoBar> {
   }
 
   // Radio button cho giới tính
-  Widget _genderRadio(String value) {
+  Widget _genderRadio(String value, UserState userState) {
     return Row(
       children: [
         Radio<String>(
           value: value,
-          groupValue: _gender,
+          groupValue: userState.gender,
           onChanged: (newValue) {
-            setState(() {
-              _gender = newValue!;
-              _notifyInfoChange(); // Cập nhật logic tính toán khi giới tính thay đổi
-              genderGlobal = newValue;
-            });
+            if (newValue != null) {
+              userState.updateGender(newValue);
+              widget.onInfoChanged?.call(userState.yearOfBirth, newValue);
+            }
           },
-          activeColor: const Color(0xFFC7C400),
+          activeColor: const Color(AppConstants.darkYellowColor),
         ),
-        Text(value, style: const TextStyle(color: Color(0xFFFDFC99))),
+        Text(value,
+            style: const TextStyle(color: Color(AppConstants.yellowColor))),
       ],
     );
-  }
-
-  // Gọi callback khi thông tin thay đổi
-  void _notifyInfoChange() {
-    // Ánh xạ giới tính từ tiếng Việt sang tiếng Anh
-    final genderMapping = {'Nam': 'male', 'Nữ': 'female'};
-    final mappedGender = genderMapping[_gender];
-
-    if (widget.onInfoChanged != null) {
-      widget.onInfoChanged!(_yearController.text, _gender);
-    }
-
-    if (_yearController.text.isNotEmpty && mappedGender != null) {
-      try {
-        final yearOfBirth = int.parse(_yearController.text);
-        final result =
-            GuaCalculator.determineMansion(yearOfBirth, mappedGender);
-
-        if (result.containsKey('error')) {
-          setState(() {
-            _guaResult = "Lỗi: ${result['error']}";
-          });
-        } else {
-          final guaNumber = result['guaNumber'].toString();
-          final mansion = result['mansion'];
-          setState(() {
-            _guaResult = "Quái số: $guaNumber, Mệnh: $mansion";
-          });
-        }
-      } catch (e) {
-        debugPrint("Lỗi khi tính toán: $e");
-      }
-    } else {
-      setState(() {
-        _yearOfBirth = _yearController.text; // Cập nhật giá trị năm sinh
-      });
-
-      if (_yearController.text.isNotEmpty && mappedGender != null) {
-        try {
-          final yearOfBirth = int.parse(_yearController.text);
-          final result =
-              GuaCalculator.determineMansion(yearOfBirth, mappedGender);
-
-          if (result.containsKey('error')) {
-            setState(() {
-              _guaResult = "Lỗi: ${result['error']}";
-            });
-          } else {
-            final guaNumber = result['guaNumber'].toString();
-            final mansion = result['mansion'];
-            setState(() {
-              _guaResult = "Quái số: $guaNumber, Mệnh: $mansion";
-            });
-          }
-        } catch (e) {
-          debugPrint("Lỗi khi tính toán: $e");
-        }
-      } else {
-        setState(() {
-          _guaResult = "Chưa có đủ dữ liệu để tính toán.";
-        });
-      }
-    }
   }
 }
