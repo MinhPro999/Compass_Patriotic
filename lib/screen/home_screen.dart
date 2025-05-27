@@ -3,9 +3,9 @@ import 'package:compassapp_vn/screen/screen_compass_8.dart';
 import 'package:compassapp_vn/widgets/funtion_gidview.dart';
 import 'package:compassapp_vn/widgets/user_info_bar.dart';
 import 'package:compassapp_vn/widgets/ads_banner_widget.dart';
-import 'package:compassapp_vn/widgets/ads_allpage_widget.dart';
 import 'package:compassapp_vn/providers/user_state.dart';
 import 'package:compassapp_vn/services/facebook_service.dart';
+import 'package:compassapp_vn/services/admob_service.dart';
 import 'package:compassapp_vn/core/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -93,7 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             );
 
                                             // Hiển thị interstitial ad trước khi navigate
-                                            await InterstitialAdHelper.showAd();
+                                            await AdMobService.instance
+                                                .showInterstitialAd();
 
                                             if (context.mounted) {
                                               Navigator.push(
@@ -151,8 +152,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                               );
 
                                               // Hiển thị interstitial ad trước khi navigate
-                                              await InterstitialAdHelper
-                                                  .showAd();
+                                              await AdMobService.instance
+                                                  .showInterstitialAd();
 
                                               if (context.mounted) {
                                                 Navigator.push(

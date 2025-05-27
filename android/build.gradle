@@ -23,7 +23,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.2' // Cập nhật phiên bản mới nhất
+        classpath 'com.android.tools.build:gradle:8.8.0' // Cập nhật phiên bản mới nhất
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.10'
     }
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logging/logging.dart';
@@ -19,17 +18,14 @@ class AdMobService {
   // Ad instances
   BannerAd? _bannerAd;
   InterstitialAd? _interstitialAd;
-  RewardedAd? _rewardedAd;
 
   // Ad states
   bool _isBannerLoaded = false;
   bool _isInterstitialLoaded = false;
-  bool _isRewardedLoaded = false;
 
   // Getters for ad states
   bool get isBannerLoaded => _isBannerLoaded;
   bool get isInterstitialLoaded => _isInterstitialLoaded;
-  bool get isRewardedLoaded => _isRewardedLoaded;
 
   /// Khởi tạo AdMob
   Future<void> initialize() async {
@@ -44,20 +40,14 @@ class AdMobService {
       _isInitialized = true;
 
       // Pre-load ads
-      await _preloadAds();
+      await Future.wait([
+        loadBannerAd(),
+        loadInterstitialAd(),
+      ]);
     } catch (e) {
       _logger.severe('Failed to initialize AdMob: $e');
       _isInitialized = false;
     }
-  }
-
-  /// Pre-load ads để sẵn sàng hiển thị
-  Future<void> _preloadAds() async {
-    await Future.wait([
-      loadBannerAd(),
-      loadInterstitialAd(),
-      loadRewardedAd(),
-    ]);
   }
 
   /// Load Banner Ad
@@ -144,50 +134,6 @@ class AdMobService {
     }
   }
 
-  /// Load Rewarded Ad
-  Future<void> loadRewardedAd() async {
-    try {
-      await RewardedAd.load(
-        adUnitId: _getRewardedAdUnitId(),
-        request: const AdRequest(),
-        rewardedAdLoadCallback: RewardedAdLoadCallback(
-          onAdLoaded: (ad) {
-            _rewardedAd = ad;
-            _isRewardedLoaded = true;
-            _logger.info('Rewarded ad loaded successfully');
-
-            _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
-              onAdShowedFullScreenContent: (_) {
-                _logger.info('Rewarded ad showed');
-              },
-              onAdDismissedFullScreenContent: (ad) {
-                _logger.info('Rewarded ad dismissed');
-                ad.dispose();
-                _isRewardedLoaded = false;
-                loadRewardedAd();
-              },
-              onAdFailedToShowFullScreenContent: (ad, error) {
-                _logger.warning('Rewarded ad failed to show: $error');
-                ad.dispose();
-                _isRewardedLoaded = false;
-                loadRewardedAd();
-              },
-            );
-          },
-          onAdFailedToLoad: (error) {
-            _isRewardedLoaded = false;
-            _logger.warning('Rewarded ad failed to load: ${error.message}');
-
-            Timer(const Duration(seconds: 30), () => loadRewardedAd());
-          },
-        ),
-      );
-    } catch (e) {
-      _logger.severe('Error loading rewarded ad: $e');
-      _isRewardedLoaded = false;
-    }
-  }
-
   /// Show Interstitial Ad
   Future<bool> showInterstitialAd() async {
     if (!_isInterstitialLoaded || _interstitialAd == null) {
@@ -200,24 +146,6 @@ class AdMobService {
       return true;
     } catch (e) {
       _logger.severe('Error showing interstitial ad: $e');
-      return false;
-    }
-  }
-
-  /// Show Rewarded Ad
-  Future<bool> showRewardedAd({
-    required OnUserEarnedRewardCallback onUserEarnedReward,
-  }) async {
-    if (!_isRewardedLoaded || _rewardedAd == null) {
-      _logger.warning('Rewarded ad not ready');
-      return false;
-    }
-
-    try {
-      await _rewardedAd!.show(onUserEarnedReward: onUserEarnedReward);
-      return true;
-    } catch (e) {
-      _logger.severe('Error showing rewarded ad: $e');
       return false;
     }
   }
@@ -235,38 +163,22 @@ class AdMobService {
     );
   }
 
-  /// Get appropriate ad unit IDs based on platform and test mode
+  /// Get production ad unit IDs
   String _getBannerAdUnitId() {
-    if (AppConstants.useTestAds || kDebugMode) {
-      return AppConstants.testBannerAdUnitId;
-    }
     return AppConstants.bannerAdUnitId;
   }
 
   String _getInterstitialAdUnitId() {
-    if (AppConstants.useTestAds || kDebugMode) {
-      return AppConstants.testInterstitialAdUnitId;
-    }
     return AppConstants.interstitialAdUnitId;
-  }
-
-  String _getRewardedAdUnitId() {
-    if (AppConstants.useTestAds || kDebugMode) {
-      return AppConstants.testRewardedAdUnitId;
-    }
-    // Add production rewarded ad unit ID when available
-    return AppConstants.testRewardedAdUnitId;
   }
 
   /// Dispose all ads
   void dispose() {
     _bannerAd?.dispose();
     _interstitialAd?.dispose();
-    _rewardedAd?.dispose();
 
     _isBannerLoaded = false;
     _isInterstitialLoaded = false;
-    _isRewardedLoaded = false;
 
     _logger.info('AdMob service disposed');
   }

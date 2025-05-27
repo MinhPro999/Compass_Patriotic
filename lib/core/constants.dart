@@ -87,20 +87,8 @@ class AppConstants {
   static const String interstitialAdUnitId =
       'ca-app-pub-9304712998147652/1837124648';
 
-  // Test Ad Unit IDs (for development)
-  static const String testBannerAdUnitId =
-      'ca-app-pub-3940256099942544/6300978111';
-  static const String testInterstitialAdUnitId =
-      'ca-app-pub-3940256099942544/1033173712';
-  static const String testRewardedAdUnitId =
-      'ca-app-pub-3940256099942544/5224354917';
-
   // AdMob Settings
-  static const bool useTestAds =
-      true; // Set to true for development, false for production
   static const int adLoadTimeoutSeconds = 10;
-  static const int interstitialAdFrequency =
-      3; // Show interstitial every N navigations
 
   // Facebook SDK Configuration
   static const String facebookAppId = '1010457991232883';
