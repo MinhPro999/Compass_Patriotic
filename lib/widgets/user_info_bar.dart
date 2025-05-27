@@ -16,6 +16,7 @@ class UserInfoBar extends StatefulWidget {
 class _UserInfoBarState extends State<UserInfoBar> {
   final TextEditingController _yearController = TextEditingController();
   final FocusNode _yearFocusNode = FocusNode();
+  bool _isInitialized = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +29,12 @@ class _UserInfoBarState extends State<UserInfoBar> {
 
     return Consumer<UserState>(
       builder: (context, userState, child) {
+        // Sync dữ liệu từ UserState vào TextField khi cần thiết
+        if (!_isInitialized && userState.yearOfBirth.isNotEmpty) {
+          _yearController.text = userState.yearOfBirth;
+          _isInitialized = true;
+        }
+
         return Container(
           color: const Color(AppConstants.statusBarColor),
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),

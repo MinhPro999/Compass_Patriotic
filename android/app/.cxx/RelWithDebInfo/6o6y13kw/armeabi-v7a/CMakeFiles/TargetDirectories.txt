@@ -1,0 +1,2 @@
+/Users/m.mac/app_dev/compass_vi/android/app/.cxx/RelWithDebInfo/6o6y13kw/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/m.mac/app_dev/compass_vi/android/app/.cxx/RelWithDebInfo/6o6y13kw/armeabi-v7a/CMakeFiles/rebuild_cache.dir

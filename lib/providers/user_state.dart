@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import '../core/culcalator_monster.dart';
 import '../core/constants.dart';
 import '../services/facebook_service.dart';
+import '../services/storage_service.dart';
 
 /// Provider để quản lý state của user (giới tính, năm sinh, quái số)
 class UserState extends ChangeNotifier {
@@ -26,12 +27,48 @@ class UserState extends ChangeNotifier {
   String get errorMessage => _errorMessage;
   bool get hasValidData => _gender.isNotEmpty && _yearOfBirth.isNotEmpty;
 
+  /// Khởi tạo và load dữ liệu đã lưu
+  Future<void> initialize() async {
+    _logger.info('Initializing UserState...');
+    await loadSavedData();
+  }
+
+  /// Load dữ liệu đã lưu từ storage
+  Future<void> loadSavedData() async {
+    try {
+      final userInfo = StorageService.instance.getSavedUserInfo();
+      final savedGender = userInfo['gender'];
+      final savedYear = userInfo['yearOfBirth'];
+
+      if (savedGender != null && savedGender.isNotEmpty) {
+        _gender = savedGender;
+        _logger.info('Loaded saved gender: $savedGender');
+      }
+
+      if (savedYear != null && savedYear.isNotEmpty) {
+        _yearOfBirth = savedYear;
+        _logger.info('Loaded saved year of birth: $savedYear');
+      }
+
+      if (_gender.isNotEmpty || _yearOfBirth.isNotEmpty) {
+        _calculateGuaNumber();
+        notifyListeners();
+        _logger.info('User data loaded successfully');
+      }
+    } catch (e) {
+      _logger.severe('Error loading saved data: $e');
+    }
+  }
+
   /// Cập nhật giới tính
   void updateGender(String gender) {
     if (_gender != gender) {
       _gender = gender;
       _logger.info('Gender updated to: $gender');
       _calculateGuaNumber();
+
+      // Lưu vào storage
+      _saveToStorage();
 
       // Log to Facebook
       FacebookService.instance.setUserProperties(
@@ -49,6 +86,9 @@ class UserState extends ChangeNotifier {
       _yearOfBirth = year;
       _logger.info('Year of birth updated to: $year');
       _calculateGuaNumber();
+
+      // Lưu vào storage
+      _saveToStorage();
 
       // Log to Facebook
       FacebookService.instance.setUserProperties(
@@ -69,8 +109,54 @@ class UserState extends ChangeNotifier {
     _guaResult = AppConstants.insufficientDataMessage;
     _hasError = false;
     _errorMessage = '';
+
+    // Xóa dữ liệu trong storage
+    _clearStorage();
+
     _logger.info('User state reset');
     notifyListeners();
+  }
+
+  /// Lưu dữ liệu vào storage
+  void _saveToStorage() {
+    if (_gender.isNotEmpty && _yearOfBirth.isNotEmpty) {
+      StorageService.instance
+          .saveUserInfo(_gender, _yearOfBirth)
+          .then((success) {
+        if (success) {
+          _logger.info('User data saved to storage');
+        } else {
+          _logger.warning('Failed to save user data to storage');
+        }
+      }).catchError((error) {
+        _logger.severe('Error saving to storage: $error');
+      });
+    } else if (_gender.isNotEmpty) {
+      StorageService.instance.saveGender(_gender).then((success) {
+        if (!success) {
+          _logger.warning('Failed to save gender to storage');
+        }
+      });
+    } else if (_yearOfBirth.isNotEmpty) {
+      StorageService.instance.saveYearOfBirth(_yearOfBirth).then((success) {
+        if (!success) {
+          _logger.warning('Failed to save year of birth to storage');
+        }
+      });
+    }
+  }
+
+  /// Xóa dữ liệu trong storage
+  void _clearStorage() {
+    StorageService.instance.clearUserData().then((success) {
+      if (success) {
+        _logger.info('User data cleared from storage');
+      } else {
+        _logger.warning('Failed to clear user data from storage');
+      }
+    }).catchError((error) {
+      _logger.severe('Error clearing storage: $error');
+    });
   }
 
   /// Tính toán quái số và mệnh
