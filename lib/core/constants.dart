@@ -28,7 +28,7 @@ class AppConstants {
   // Asset Paths
   static const String backgroundImage = 'assets/images/background.jpg';
   static const String screenBackground = 'assets/images/screen_dang.jpg';
-  static const String compassImage = 'assets/images/compass.png';
+  static const String compassImage = 'assets/images/compass.jpg';
   static const String compassOverlay = 'assets/images/khung_compass.png';
   static const String compass8Overlay = 'assets/images/khung_8.png';
   static const String normalCompassImage = 'assets/images/normal_compass.JPG';
@@ -36,7 +36,7 @@ class AppConstants {
   static const String appIcon = 'assets/images/icon_app_mini.png';
 
   // Font Family
-  static const String fontFamily = 'opensans';
+  static const String fontFamily = 'Roboto'; // Use system font
 
   // Error Messages
   static const String noSensorData = 'Không có dữ liệu cảm biến!';

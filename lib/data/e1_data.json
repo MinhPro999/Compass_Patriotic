@@ -1,6 +1,6 @@
 {
   "compass": [
-    {"background": "assets/images_compass/background_1.jpg", "co": "assets/images_compass/lb_e1.png"}
+    {"background": "assets/images_compass/background_1.jpg", "co": "assets/images_compass/lb_e1.jpg"}
   ],
   "huong_tot_xau": [
     { "huong": "Đông", "cung": "Thiên Y", "tot_xau": "Hướng Tốt", "color_chu": "0xFFFFFFFF", "color_box": "0xFF01A868" },

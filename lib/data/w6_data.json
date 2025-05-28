@@ -1,6 +1,6 @@
 {
   "compass": [
-    {"background": "assets/images_compass/background_6.jpg", "co": "assets/images_compass/lb_w6.png"}
+    {"background": "assets/images_compass/background_6.jpg", "co": "assets/images_compass/lb_w6.jpg"}
   ],
   "huong_tot_xau": [
     { "huong": "Đông", "cung": "Ngũ Quỷ", "tot_xau": "Hướng Xấu", "color_chu": "0xFF800000", "color_box": "0xFFFFAAAA" },

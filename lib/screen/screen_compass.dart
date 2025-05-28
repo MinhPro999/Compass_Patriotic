@@ -44,7 +44,7 @@ class CompassDetailScreen extends StatefulWidget {
 
 class _CompassDetailScreenState extends State<CompassDetailScreen> {
   final String backgroundImagePath = 'assets/images/screen_dang.jpg';
-  final String compassImagePath = 'assets/images/compass.png';
+  final String compassImagePath = 'assets/images/compass.jpg';
   final String overlayImagePath = 'assets/images/khung_compass.png';
   bool _permissionsChecked = false;
 
