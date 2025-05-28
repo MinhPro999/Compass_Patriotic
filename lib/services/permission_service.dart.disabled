@@ -1,0 +1,240 @@
+import 'package:permission_handler/permission_handler.dart';
+import 'package:logging/logging.dart';
+import 'package:flutter/material.dart';
+
+/// Service để quản lý quyền truy cập cảm biến và vị trí
+class PermissionService {
+  static final Logger _logger = Logger('PermissionService');
+  static PermissionService? _instance;
+  static PermissionService get instance => _instance ??= PermissionService._();
+  
+  PermissionService._();
+
+  bool _isInitialized = false;
+  bool _hasLocationPermission = false;
+  bool _hasSensorPermission = false;
+  
+  bool get isInitialized => _isInitialized;
+  bool get hasLocationPermission => _hasLocationPermission;
+  bool get hasSensorPermission => _hasSensorPermission;
+  bool get hasAllPermissions => _hasLocationPermission && _hasSensorPermission;
+
+  /// Khởi tạo và kiểm tra quyền
+  Future<void> initialize() async {
+    try {
+      _logger.info('Initializing PermissionService...');
+      
+      await _checkCurrentPermissions();
+      _isInitialized = true;
+      
+      _logger.info('PermissionService initialized successfully');
+      _logger.info('Location permission: $_hasLocationPermission');
+      _logger.info('Sensor permission: $_hasSensorPermission');
+      
+    } catch (e) {
+      _logger.severe('Failed to initialize PermissionService: $e');
+      _isInitialized = false;
+    }
+  }
+
+  /// Kiểm tra quyền hiện tại
+  Future<void> _checkCurrentPermissions() async {
+    try {
+      // Kiểm tra quyền vị trí
+      final locationStatus = await Permission.locationWhenInUse.status;
+      _hasLocationPermission = locationStatus.isGranted;
+      
+      // Kiểm tra quyền cảm biến (iOS)
+      final sensorStatus = await Permission.sensors.status;
+      _hasSensorPermission = sensorStatus.isGranted;
+      
+      _logger.info('Current permissions - Location: $_hasLocationPermission, Sensor: $_hasSensorPermission');
+    } catch (e) {
+      _logger.warning('Error checking current permissions: $e');
+      _hasLocationPermission = false;
+      _hasSensorPermission = false;
+    }
+  }
+
+  /// Yêu cầu tất cả quyền cần thiết cho la bàn
+  Future<bool> requestCompassPermissions() async {
+    try {
+      _logger.info('Requesting compass permissions...');
+      
+      // Yêu cầu quyền vị trí
+      final locationGranted = await _requestLocationPermission();
+      
+      // Yêu cầu quyền cảm biến
+      final sensorGranted = await _requestSensorPermission();
+      
+      _hasLocationPermission = locationGranted;
+      _hasSensorPermission = sensorGranted;
+      
+      final allGranted = locationGranted && sensorGranted;
+      
+      _logger.info('Permission request result - Location: $locationGranted, Sensor: $sensorGranted');
+      
+      return allGranted;
+    } catch (e) {
+      _logger.severe('Error requesting compass permissions: $e');
+      return false;
+    }
+  }
+
+  /// Yêu cầu quyền vị trí
+  Future<bool> _requestLocationPermission() async {
+    try {
+      final status = await Permission.locationWhenInUse.request();
+      
+      switch (status) {
+        case PermissionStatus.granted:
+          _logger.info('Location permission granted');
+          return true;
+        case PermissionStatus.denied:
+          _logger.warning('Location permission denied');
+          return false;
+        case PermissionStatus.permanentlyDenied:
+          _logger.warning('Location permission permanently denied');
+          return false;
+        case PermissionStatus.restricted:
+          _logger.warning('Location permission restricted');
+          return false;
+        default:
+          _logger.warning('Location permission status: $status');
+          return false;
+      }
+    } catch (e) {
+      _logger.severe('Error requesting location permission: $e');
+      return false;
+    }
+  }
+
+  /// Yêu cầu quyền cảm biến
+  Future<bool> _requestSensorPermission() async {
+    try {
+      final status = await Permission.sensors.request();
+      
+      switch (status) {
+        case PermissionStatus.granted:
+          _logger.info('Sensor permission granted');
+          return true;
+        case PermissionStatus.denied:
+          _logger.warning('Sensor permission denied');
+          return false;
+        case PermissionStatus.permanentlyDenied:
+          _logger.warning('Sensor permission permanently denied');
+          return false;
+        case PermissionStatus.restricted:
+          _logger.warning('Sensor permission restricted');
+          return false;
+        default:
+          _logger.warning('Sensor permission status: $status');
+          return false;
+      }
+    } catch (e) {
+      _logger.severe('Error requesting sensor permission: $e');
+      return false;
+    }
+  }
+
+  /// Hiển thị dialog yêu cầu quyền
+  Future<bool> showPermissionDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Quyền truy cập cần thiết'),
+          content: const Text(
+            'Ứng dụng La Bàn cần quyền truy cập:\n\n'
+            '• Vị trí: Để xác định hướng Bắc từ tính\n'
+            '• Cảm biến chuyển động: Để đo hướng la bàn\n\n'
+            'Vui lòng cấp quyền để ứng dụng hoạt động chính xác.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Từ chối'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Cấp quyền'),
+            ),
+          ],
+        );
+      },
+    );
+    
+    if (result == true) {
+      return await requestCompassPermissions();
+    }
+    
+    return false;
+  }
+
+  /// Hiển thị dialog hướng dẫn mở Settings
+  Future<void> showSettingsDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cần cấp quyền'),
+          content: const Text(
+            'Ứng dụng cần quyền truy cập vị trí và cảm biến để hoạt động.\n\n'
+            'Vui lòng vào Cài đặt > Quyền riêng tư & Bảo mật > La Bàn Đại Việt '
+            'để cấp quyền.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Đóng'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                openAppSettings();
+              },
+              child: const Text('Mở Cài đặt'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Kiểm tra và yêu cầu quyền nếu cần
+  Future<bool> ensurePermissions(BuildContext context) async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+    
+    // Kiểm tra quyền hiện tại
+    await _checkCurrentPermissions();
+    
+    if (hasAllPermissions) {
+      _logger.info('All permissions already granted');
+      return true;
+    }
+    
+    // Hiển thị dialog và yêu cầu quyền
+    final granted = context.mounted ? await showPermissionDialog(context) : false;
+    
+    if (!granted && context.mounted) {
+      // Nếu bị từ chối, kiểm tra xem có bị permanently denied không
+      final locationStatus = await Permission.locationWhenInUse.status;
+      final sensorStatus = await Permission.sensors.status;
+      
+      if ((locationStatus.isPermanentlyDenied || sensorStatus.isPermanentlyDenied) && context.mounted) {
+        await showSettingsDialog(context);
+      }
+    }
+    
+    return granted;
+  }
+
+  /// Refresh permission status
+  Future<void> refreshPermissions() async {
+    await _checkCurrentPermissions();
+    _logger.info('Permissions refreshed - Location: $_hasLocationPermission, Sensor: $_hasSensorPermission');
+  }
+}

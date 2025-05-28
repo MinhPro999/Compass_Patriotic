@@ -4,6 +4,7 @@ import 'package:compassapp_vn/providers/compass_state.dart';
 import 'package:compassapp_vn/services/admob_service.dart';
 import 'package:compassapp_vn/services/facebook_service.dart';
 import 'package:compassapp_vn/services/storage_service.dart';
+// import 'package:compassapp_vn/services/permission_service.dart'; // Disabled - not needed
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logging/logging.dart';
@@ -19,6 +20,9 @@ void main() async {
 
   // Khởi tạo Storage service
   await StorageService.instance.initialize();
+
+  // Note: Permission service disabled - compass doesn't need permissions
+  // await PermissionService.instance.initialize();
 
   // Khởi tạo AdMob service
   await AdMobService.instance.initialize();

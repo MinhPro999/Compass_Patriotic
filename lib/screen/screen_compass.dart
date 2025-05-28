@@ -1,8 +1,10 @@
 import 'package:compassapp_vn/core/main_compass.dart';
 import 'package:compassapp_vn/core/streambuilder_degree.dart';
 import 'package:compassapp_vn/widgets/ads_banner_widget.dart';
+import 'package:compassapp_vn/providers/compass_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 // Hàm xác định hướng từ góc
 String getDirectionFromAngle(double angle) {
@@ -26,18 +28,39 @@ String getDirectionFromAngle(double angle) {
   return 'Không xác định';
 }
 
-class CompassDetailScreen extends StatelessWidget {
+class CompassDetailScreen extends StatefulWidget {
   final String title;
   final String description;
-  final String backgroundImagePath = 'assets/images/screen_dang.jpg';
-  final String compassImagePath = 'assets/images/compass.png';
-  final String overlayImagePath = 'assets/images/khung_compass.png';
 
   const CompassDetailScreen({
     super.key,
     required this.title,
     required this.description,
   });
+
+  @override
+  State<CompassDetailScreen> createState() => _CompassDetailScreenState();
+}
+
+class _CompassDetailScreenState extends State<CompassDetailScreen> {
+  final String backgroundImagePath = 'assets/images/screen_dang.jpg';
+  final String compassImagePath = 'assets/images/compass.png';
+  final String overlayImagePath = 'assets/images/khung_compass.png';
+  bool _permissionsChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermissions();
+  }
+
+  Future<void> _checkPermissions() async {
+    final compassState = Provider.of<CompassState>(context, listen: false);
+    await compassState.initializeWithPermissions(context);
+    setState(() {
+      _permissionsChecked = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +142,7 @@ class CompassDetailScreen extends StatelessWidget {
 
                         // Mô tả
                         Text(
-                          description,
+                          widget.description,
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.white70,

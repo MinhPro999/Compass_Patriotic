@@ -5,11 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:logging/logging.dart';
 import '../core/constants.dart';
+// import '../services/permission_service.dart'; // Disabled - not needed
 
 /// Provider để quản lý state của compass
 class CompassState extends ChangeNotifier {
   static final Logger _logger = Logger('CompassState');
-  
+
   StreamSubscription<CompassEvent>? _compassSubscription;
   double _heading = 0.0;
   String _direction = DirectionConstants.unknown;
@@ -36,6 +37,49 @@ class CompassState extends ChangeNotifier {
     _initializeCompass();
   }
 
+  /// Khởi tạo compass (không cần permission)
+  Future<bool> initializeWithPermissions(context) async {
+    try {
+      _logger.info('Initializing compass (no permissions needed)...');
+
+      // Compass không cần permission - magnetometer/gyroscope là cảm biến cơ bản
+      // Khởi tạo trực tiếp
+      _reinitializeCompass();
+      return true;
+    } catch (e) {
+      _logger.severe('Error initializing compass: $e');
+      _setError('Lỗi khởi tạo la bàn: ${e.toString()}');
+      return false;
+    }
+  }
+
+  /// Khởi tạo lại compass
+  void _reinitializeCompass() {
+    try {
+      // Hủy subscription cũ nếu có
+      _compassSubscription?.cancel();
+
+      // Tạo subscription mới
+      _compassSubscription = FlutterCompass.events?.listen(
+        _onCompassEvent,
+        onError: _onCompassError,
+      );
+
+      if (_compassSubscription != null) {
+        _isCompassAvailable = true;
+        _hasError = false;
+        _errorMessage = '';
+        _logger.info('Compass reinitialized successfully');
+        notifyListeners();
+      } else {
+        _setError('Compass không khả dụng trên thiết bị này');
+      }
+    } catch (e) {
+      _logger.severe('Error reinitializing compass: $e');
+      _setError('Lỗi khởi tạo lại compass: ${e.toString()}');
+    }
+  }
+
   /// Khởi tạo compass
   void _initializeCompass() {
     try {
@@ -43,7 +87,7 @@ class CompassState extends ChangeNotifier {
         _onCompassEvent,
         onError: _onCompassError,
       );
-      
+
       if (_compassSubscription != null) {
         _isCompassAvailable = true;
         _logger.info('Compass initialized successfully');
@@ -108,20 +152,20 @@ class CompassState extends ChangeNotifier {
   /// Load dữ liệu JSON cho compass 8 hướng
   Future<void> loadJsonData({required int guaNumber}) async {
     try {
-      final fileName = AppConstants.jsonFileMapping[guaNumber] ?? 
-                     AppConstants.defaultJsonFile;
-      
-      _logger.info('Loading JSON data for gua number: $guaNumber, file: $fileName');
-      
+      final fileName = AppConstants.jsonFileMapping[guaNumber] ??
+          AppConstants.defaultJsonFile;
+
+      _logger.info(
+          'Loading JSON data for gua number: $guaNumber, file: $fileName');
+
       final String response = await rootBundle.loadString('lib/data/$fileName');
       final data = json.decode(response);
-      
+
       _compassData = data;
       _buildDataMaps();
-      
+
       _logger.info('JSON data loaded successfully');
       notifyListeners();
-      
     } catch (e) {
       _logger.severe('Error loading JSON data: $e');
       _setError('Lỗi tải dữ liệu: ${e.toString()}');
@@ -160,7 +204,7 @@ class CompassState extends ChangeNotifier {
             'khong_nen': item['khong_nen'] ?? ''
           }
       };
-      
+
       _logger.info('Data maps built successfully');
     } catch (e) {
       _logger.warning('Error building data maps: $e');
